@@ -1,0 +1,16 @@
+[Unit]
+Description=Raspi-Ham MQTT Remote Control
+After=network-online.target NetworkManager.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/raspi-ham/scripts/remote-control.sh
+Restart=always
+RestartSec=10
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

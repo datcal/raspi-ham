@@ -1,0 +1,22 @@
+[Unit]
+Description=Raspi-Ham ADS-B Decoder (dump1090-fa)
+After=network-online.target
+Wants=network-online.target
+Conflicts=rtl-tcp.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/dump1090-fa --net --device-index 0 --gain -10 --max-range 300 --net-bind-address 0.0.0.0 --write-json /run/dump1090-fa
+Restart=on-failure
+RestartSec=10
+User=rtlsdr
+Group=rtlsdr
+MemoryMax=96M
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ReadWritePaths=/run/dump1090-fa
+
+[Install]
+WantedBy=multi-user.target

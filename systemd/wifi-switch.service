@@ -1,0 +1,16 @@
+[Unit]
+Description=Raspi-Ham WiFi Switch Button Daemon
+After=multi-user.target NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/raspi-ham/scripts/wifi-switch.py
+Restart=always
+RestartSec=5
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+# raspi-ham MQTT remote control config
+# copy to /etc/raspi-ham/remote.conf and fill in your broker details
+#
+# free MQTT broker: https://www.hivemq.com/mqtt-cloud-broker/
+# 1. sign up (free)
+# 2. create cluster
+# 3. create credentials (username/password)
+# 4. put the details below
+
+MQTT_HOST="your-cluster.s1.eu.hivemq.cloud"
+MQTT_PORT="8883"
+MQTT_USER="raspi-ham"
+MQTT_PASS="change-me"
+
+# MQTT topics (change if you have multiple pis)
+MQTT_TOPIC_CMD="raspi-ham/cmd"
+MQTT_TOPIC_STATUS="raspi-ham/status"
+
+# optional: your web panel URL (for status reporting backup)
+# leave empty to skip
+PANEL_URL=""

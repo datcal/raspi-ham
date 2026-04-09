@@ -1,0 +1,24 @@
+[Unit]
+Description=RTL-SDR TCP Server (raspi-ham)
+After=network-online.target
+Wants=network-online.target
+Conflicts=raspi-ham-dump1090.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 5
+ExecStart=/opt/raspi-ham/scripts/start-rtl-tcp.sh
+Restart=on-failure
+RestartSec=10
+User=rtlsdr
+Group=rtlsdr
+MemoryMax=128M
+Nice=-5
+LimitNOFILE=1024
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

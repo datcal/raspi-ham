@@ -1,0 +1,24 @@
+# wifi credentials - NEVER commit these
+wifi.conf
+*.conf
+!config/*.conf
+!config/*.template
+
+# python
+__pycache__/
+*.pyc
+
+# env
+.env
+.env.*
+
+# os
+.DS_Store
+Thumbs.db
+
+# editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

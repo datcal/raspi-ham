@@ -1,0 +1,14 @@
+# raspi-ham wifi config
+# copy this to /etc/raspi-ham/wifi.conf and fill in your credentials
+# then run: sudo raspi-ham-setup-wifi
+
+# button A - iphone hotspot (outdoor/portable)
+HOTSPOT_SSID="My-iPhone"
+HOTSPOT_PSK="change-me"
+
+# button B - home wifi (indoor/bench)
+HOME_SSID="HomeNetwork"
+HOME_PSK="change-me"
+
+# which network to connect on boot? (hotspot|home)
+DEFAULT_NETWORK="home"
