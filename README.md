@@ -62,7 +62,7 @@ total draw is about 570mA at 5V (~2.85W) with the sdr running and wifi active.
 flash [Raspberry Pi OS Lite (Bookworm 32-bit)](https://www.raspberrypi.com/software/) to an SD card, enable SSH, boot it up, then:
 
 ```bash
-sudo bash <(curl -sL https://raw.githubusercontent.com/datcal/raspi-ham/main/install.sh)
+curl -sL https://raw.githubusercontent.com/datcal/raspi-ham/main/install.sh | sudo bash
 ```
 
 this does everything: updates the system, builds rtl-sdr drivers, installs dump1090, sets up systemd services, configures the firewall, the whole thing. takes maybe 20-30 min on a pi zero (most of that is compiling).

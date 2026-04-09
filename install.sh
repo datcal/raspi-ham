@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # raspi-ham installer
 # run on a fresh raspberry pi os lite (bookworm):
-#   sudo bash <(curl -sL https://raw.githubusercontent.com/datcal/raspi-ham/main/install.sh)
+#   curl -sL https://raw.githubusercontent.com/datcal/raspi-ham/main/install.sh | sudo bash
 set -euo pipefail
 
 REPO_URL="https://github.com/datcal/raspi-ham.git"
