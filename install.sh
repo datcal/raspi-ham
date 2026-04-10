@@ -69,6 +69,10 @@ echo "  kernel: $(uname -r)"
 
 # ---- system update ----
 
+# prevent interactive prompts during install (like the wireshark dialog)
+export DEBIAN_FRONTEND=noninteractive
+echo 'wireshark-common wireshark-common/install-setuid boolean true' | debconf-set-selections
+
 step "updating system packages (this takes a while on pi zero)..."
 apt-get update -qq
 apt-get upgrade -y -qq
@@ -96,7 +100,8 @@ apt-get install -y -qq \
     tshark \
     horst \
     iw \
-    mosquitto-clients
+    mosquitto-clients \
+    tmux
 
 # ---- blacklist dvb-t drivers ----
 
@@ -287,9 +292,42 @@ fi
 
 # ---- SSH ----
 
-step "enabling SSH..."
+step "enabling SSH + tmux auto-attach..."
 systemctl enable ssh
 systemctl start ssh
+
+# auto-start tmux on SSH login so you can resume sessions from any device
+# only triggers on interactive SSH sessions, not scp/sftp
+TMUX_AUTOSTART='
+# raspi-ham: auto-attach tmux on SSH login
+if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ] && command -v tmux &>/dev/null; then
+    tmux attach-session -t ham 2>/dev/null || tmux new-session -s ham
+fi'
+
+# add to the actual user's bashrc (not root)
+REAL_USER="${SUDO_USER:-datcal}"
+REAL_HOME=$(eval echo "~$REAL_USER")
+if [ -f "$REAL_HOME/.bashrc" ] && ! grep -q "raspi-ham: auto-attach tmux" "$REAL_HOME/.bashrc"; then
+    echo "$TMUX_AUTOSTART" >> "$REAL_HOME/.bashrc"
+    echo "  tmux auto-attach enabled for $REAL_USER"
+fi
+
+# tmux config: show useful status bar
+if [ ! -f "$REAL_HOME/.tmux.conf" ]; then
+    cat > "$REAL_HOME/.tmux.conf" << 'TMUXCONF'
+# raspi-ham tmux config
+set -g mouse on
+set -g history-limit 10000
+set -g status-bg black
+set -g status-fg green
+set -g status-left '[#S] '
+set -g status-right '#(hostname -I | awk "{print $1}") | #(raspi-ham-mode status 2>/dev/null || echo "?") | %H:%M'
+set -g status-right-length 60
+TMUXCONF
+    chown "$REAL_USER:$REAL_USER" "$REAL_HOME/.tmux.conf"
+    echo "  tmux config created"
+fi
+
 echo "  SSH enabled"
 
 # ---- convenience symlinks ----
