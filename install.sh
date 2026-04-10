@@ -7,6 +7,7 @@ set -euo pipefail
 REPO_URL="https://github.com/datcal/raspi-ham.git"
 INSTALL_DIR="/opt/raspi-ham"
 CONFIG_DIR="/etc/raspi-ham"
+BUILD_DIR="/var/tmp/raspi-ham-build"
 LOG_FILE="/var/log/raspi-ham-install.log"
 
 TOTAL_STEPS=20
@@ -33,7 +34,7 @@ die() {
 }
 
 cleanup() {
-    rm -rf /tmp/rtl-sdr-blog /tmp/dump1090 /tmp/rtl8812au 2>/dev/null || true
+    rm -rf "$BUILD_DIR" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -121,9 +122,9 @@ rmmod rtl2830 2>/dev/null || true
 # ---- build rtl-sdr blog drivers ----
 
 step "building RTL-SDR Blog drivers from source (takes ~10 min on pi zero)..."
-cd /tmp
+mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR"
 rm -rf rtl-sdr-blog
-git clone https://github.com/rtlsdrblog/rtl-sdr-blog.git
+git clone --depth 1 https://github.com/rtlsdrblog/rtl-sdr-blog.git
 cd rtl-sdr-blog
 mkdir -p build && cd build
 cmake .. -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
@@ -132,7 +133,7 @@ make install
 ldconfig
 
 # udev rules
-cp /tmp/rtl-sdr-blog/rtl-sdr.rules /etc/udev/rules.d/20-rtlsdr.rules
+cp "$BUILD_DIR/rtl-sdr-blog/rtl-sdr.rules" /etc/udev/rules.d/20-rtlsdr.rules
 udevadm control --reload-rules
 udevadm trigger
 
@@ -149,9 +150,9 @@ fi
 # fallback: build from source
 if [ "$DUMP1090_INSTALLED" = false ]; then
     warn "dump1090-fa not in apt, building from source..."
-    cd /tmp
+    cd "$BUILD_DIR"
     rm -rf dump1090
-    git clone https://github.com/flightaware/dump1090.git
+    git clone --depth 1 https://github.com/flightaware/dump1090.git
     cd dump1090
     make -j1
     cp dump1090 /usr/bin/dump1090-fa
@@ -162,13 +163,13 @@ fi
 systemctl stop dump1090-fa 2>/dev/null || true
 systemctl disable dump1090-fa 2>/dev/null || true
 
-# free up /tmp space before next build
-rm -rf /tmp/rtl-sdr-blog /tmp/dump1090
+# free up space before next build
+rm -rf "$BUILD_DIR/rtl-sdr-blog" "$BUILD_DIR/dump1090"
 
 # ---- build rtl8812au driver (USB WiFi adapter for monitor mode) ----
 
 step "building RTL8812AU WiFi driver (takes ~15-20 min on pi zero)..."
-cd /tmp
+cd "$BUILD_DIR"
 rm -rf rtl8812au
 git clone --depth 1 https://github.com/aircrack-ng/rtl8812au.git
 cd rtl8812au
