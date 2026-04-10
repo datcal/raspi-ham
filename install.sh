@@ -168,20 +168,30 @@ rm -rf "$BUILD_DIR/rtl-sdr-blog" "$BUILD_DIR/dump1090"
 
 # ---- build rtl8812au driver (USB WiFi adapter for monitor mode) ----
 
-step "building RTL8812AU WiFi driver (takes ~15-20 min on pi zero)..."
-cd "$BUILD_DIR"
-rm -rf rtl8812au
-git clone --depth 1 https://github.com/aircrack-ng/rtl8812au.git
-cd rtl8812au
+step "(optional) building RTL8812AU WiFi driver..."
+if modinfo 88XXau &>/dev/null; then
+    echo "  rtl8812au driver already installed, skipping"
+else
+    cd "$BUILD_DIR"
+    rm -rf rtl8812au
+    git clone --depth 1 https://github.com/aircrack-ng/rtl8812au.git
+    cd rtl8812au
 
-# set platform for Pi Zero W (ARM)
-sed -i 's/CONFIG_PLATFORM_I386_PC = y/CONFIG_PLATFORM_I386_PC = n/' Makefile
-sed -i 's/CONFIG_PLATFORM_ARM_RPI = n/CONFIG_PLATFORM_ARM_RPI = y/' Makefile
+    # set platform for Pi Zero W (ARM)
+    sed -i 's/CONFIG_PLATFORM_I386_PC = y/CONFIG_PLATFORM_I386_PC = n/' Makefile
+    sed -i 's/CONFIG_PLATFORM_ARM_RPI = n/CONFIG_PLATFORM_ARM_RPI = y/' Makefile
 
-make -j1
-make install
-modprobe 88XXau 2>/dev/null || true
-echo "  rtl8812au driver installed (supports monitor mode + injection)"
+    if make -j1; then
+        make install
+        modprobe 88XXau 2>/dev/null || true
+        echo "  rtl8812au driver installed (supports monitor mode + injection)"
+    else
+        warn "rtl8812au build failed (Pi Zero W may not have enough RAM)"
+        warn "WiFi monitor mode won't work, but everything else will"
+        warn "you can try building it later when the Pi is idle:"
+        warn "  cd /var/tmp/raspi-ham-build/rtl8812au && sudo make -j1 && sudo make install"
+    fi
+fi
 
 # ---- create service user ----
 
