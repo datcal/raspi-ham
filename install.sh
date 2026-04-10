@@ -86,6 +86,7 @@ apt-get install -y -qq \
     build-essential \
     pkg-config \
     libusb-1.0-0-dev \
+    libncurses-dev \
     python3 \
     python3-pip \
     python3-gpiozero \
@@ -94,7 +95,7 @@ apt-get install -y -qq \
     unattended-upgrades \
     dkms \
     bc \
-    linux-headers-$(uname -r) \
+    linux-headers-rpi-v6 \
     aircrack-ng \
     tcpdump \
     tshark \
