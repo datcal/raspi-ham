@@ -171,7 +171,7 @@ systemctl disable dump1090-fa 2>/dev/null || true
 step "(optional) building RTL8812AU WiFi driver..."
 if modinfo 88XXau &>/dev/null; then
     echo "  rtl8812au driver already installed, skipping"
-else
+elif [ "${INSTALL_RTL8812AU:-0}" = "1" ]; then
     cd "$BUILD_DIR"
     rm -rf rtl8812au
     git clone --depth 1 https://github.com/aircrack-ng/rtl8812au.git
@@ -191,6 +191,9 @@ else
         warn "you can try building it later when the Pi is idle:"
         warn "  cd /var/tmp/raspi-ham-build/rtl8812au && sudo make -j1 && sudo make install"
     fi
+else
+    echo "  skipped (default). to install, run:"
+    echo "    curl -sL ... | sudo INSTALL_RTL8812AU=1 bash"
 fi
 
 # ---- create service user ----
