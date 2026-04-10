@@ -121,50 +121,50 @@ rmmod rtl2830 2>/dev/null || true
 
 # ---- build rtl-sdr blog drivers ----
 
-step "building RTL-SDR Blog drivers from source (takes ~10 min on pi zero)..."
-mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR"
-rm -rf rtl-sdr-blog
-git clone --depth 1 https://github.com/rtlsdrblog/rtl-sdr-blog.git
-cd rtl-sdr-blog
-mkdir -p build && cd build
-cmake .. -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
-make -j1  # pi zero has 1 core, -j1 prevents OOM
-make install
-ldconfig
-
-# udev rules
-cp "$BUILD_DIR/rtl-sdr-blog/rtl-sdr.rules" /etc/udev/rules.d/20-rtlsdr.rules
-udevadm control --reload-rules
-udevadm trigger
+step "building RTL-SDR Blog drivers from source..."
+if command -v rtl_tcp &>/dev/null; then
+    echo "  rtl-sdr already installed, skipping build"
+else
+    mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR"
+    rm -rf rtl-sdr-blog
+    git clone --depth 1 https://github.com/rtlsdrblog/rtl-sdr-blog.git
+    cd rtl-sdr-blog
+    mkdir -p build && cd build
+    cmake .. -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
+    make -j1  # pi zero has 1 core, -j1 prevents OOM
+    make install
+    ldconfig
+    cp "$BUILD_DIR/rtl-sdr-blog/rtl-sdr.rules" /etc/udev/rules.d/20-rtlsdr.rules
+    udevadm control --reload-rules
+    udevadm trigger
+    rm -rf "$BUILD_DIR/rtl-sdr-blog"
+fi
 
 # ---- install dump1090-fa ----
 
 step "installing dump1090-fa..."
-DUMP1090_INSTALLED=false
-
-# try apt first
-if apt-get install -y -qq dump1090-fa 2>/dev/null; then
-    DUMP1090_INSTALLED=true
-fi
-
-# fallback: build from source
-if [ "$DUMP1090_INSTALLED" = false ]; then
-    warn "dump1090-fa not in apt, building from source..."
-    cd "$BUILD_DIR"
-    rm -rf dump1090
-    git clone --depth 1 https://github.com/flightaware/dump1090.git
-    cd dump1090
-    make -j1
-    cp dump1090 /usr/bin/dump1090-fa
-    DUMP1090_INSTALLED=true
+if [ -f /usr/bin/dump1090-fa ]; then
+    echo "  dump1090-fa already installed, skipping"
+else
+    # try apt first
+    if apt-get install -y -qq dump1090-fa 2>/dev/null; then
+        echo "  installed dump1090-fa from apt"
+    else
+        # fallback: build from source
+        warn "dump1090-fa not in apt, building from source..."
+        mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR"
+        rm -rf dump1090
+        git clone --depth 1 https://github.com/flightaware/dump1090.git
+        cd dump1090
+        make -j1
+        cp dump1090 /usr/bin/dump1090-fa
+        rm -rf "$BUILD_DIR/dump1090"
+    fi
 fi
 
 # disable by default (conflicts with rtl_tcp)
 systemctl stop dump1090-fa 2>/dev/null || true
 systemctl disable dump1090-fa 2>/dev/null || true
-
-# free up space before next build
-rm -rf "$BUILD_DIR/rtl-sdr-blog" "$BUILD_DIR/dump1090"
 
 # ---- build rtl8812au driver (USB WiFi adapter for monitor mode) ----
 
