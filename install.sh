@@ -216,12 +216,15 @@ echo "  captures will be saved to /opt/raspi-ham/captures"
 # ---- clone repo ----
 
 step "cloning raspi-ham repo..."
-if [ -d "$INSTALL_DIR" ]; then
+if [ -d "$INSTALL_DIR/.git" ]; then
     cd "$INSTALL_DIR"
     git pull
     echo "  updated existing install"
 else
+    rm -rf "$INSTALL_DIR"
     git clone "$REPO_URL" "$INSTALL_DIR"
+    mkdir -p "$INSTALL_DIR/captures"
+    chown rtlsdr:rtlsdr "$INSTALL_DIR/captures"
     echo "  cloned to $INSTALL_DIR"
 fi
 
