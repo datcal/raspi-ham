@@ -183,13 +183,6 @@ make install
 modprobe 88XXau 2>/dev/null || true
 echo "  rtl8812au driver installed (supports monitor mode + injection)"
 
-# ---- create captures directory ----
-
-step "setting up WiFi capture directory..."
-mkdir -p /opt/raspi-ham/captures
-chown rtlsdr:rtlsdr /opt/raspi-ham/captures
-echo "  captures will be saved to /opt/raspi-ham/captures"
-
 # ---- create service user ----
 
 step "creating rtlsdr service user..."
@@ -199,6 +192,13 @@ if ! id rtlsdr &>/dev/null; then
 else
     echo "  user rtlsdr already exists"
 fi
+
+# ---- create captures directory ----
+
+step "setting up WiFi capture directory..."
+mkdir -p /opt/raspi-ham/captures
+chown rtlsdr:rtlsdr /opt/raspi-ham/captures
+echo "  captures will be saved to /opt/raspi-ham/captures"
 
 # ---- clone repo ----
 
