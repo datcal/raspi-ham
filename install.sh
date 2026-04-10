@@ -162,12 +162,15 @@ fi
 systemctl stop dump1090-fa 2>/dev/null || true
 systemctl disable dump1090-fa 2>/dev/null || true
 
+# free up /tmp space before next build
+rm -rf /tmp/rtl-sdr-blog /tmp/dump1090
+
 # ---- build rtl8812au driver (USB WiFi adapter for monitor mode) ----
 
 step "building RTL8812AU WiFi driver (takes ~15-20 min on pi zero)..."
 cd /tmp
 rm -rf rtl8812au
-git clone https://github.com/aircrack-ng/rtl8812au.git
+git clone --depth 1 https://github.com/aircrack-ng/rtl8812au.git
 cd rtl8812au
 
 # set platform for Pi Zero W (ARM)
