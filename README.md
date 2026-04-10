@@ -67,6 +67,19 @@ curl -sL https://raw.githubusercontent.com/datcal/raspi-ham/main/install.sh | su
 
 this does everything: updates the system, builds rtl-sdr drivers, installs dump1090, sets up systemd services, configures the firewall, the whole thing. takes maybe 20-30 min on a pi zero (most of that is compiling).
 
+### install options
+
+| flag | what it does |
+|------|-------------|
+| `INSTALL_RTL8812AU=1` | build the RTL8812AU WiFi driver for monitor mode. skipped by default because it takes 30+ min and can OOM on Pi Zero W. |
+
+```bash
+# with wifi monitor driver (Pi Zero 2 W or better recommended)
+curl -sL https://raw.githubusercontent.com/datcal/raspi-ham/main/install.sh | sudo INSTALL_RTL8812AU=1 bash
+```
+
+the script is safe to re-run. it skips steps that already completed.
+
 after install:
 
 ```bash
