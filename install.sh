@@ -313,40 +313,22 @@ fi
 
 # ---- SSH ----
 
-step "enabling SSH + tmux auto-attach..."
+step "enabling SSH + tmux..."
 systemctl enable ssh
 systemctl start ssh
 
-# auto-start tmux on SSH login so you can resume sessions from any device
-# only triggers on interactive SSH sessions, not scp/sftp
-TMUX_AUTOSTART='
-# raspi-ham: auto-attach tmux on SSH login
-if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ] && command -v tmux &>/dev/null; then
-    tmux attach-session -t ham 2>/dev/null || tmux new-session -s ham
-fi'
-
-# add to the actual user's bashrc (not root)
+# auto-start tmux on SSH login
+# uses .profile instead of .bashrc to avoid racing with terminal init
 REAL_USER="${SUDO_USER:-datcal}"
 REAL_HOME=$(eval echo "~$REAL_USER")
-if [ -f "$REAL_HOME/.bashrc" ] && ! grep -q "raspi-ham: auto-attach tmux" "$REAL_HOME/.bashrc"; then
-    echo "$TMUX_AUTOSTART" >> "$REAL_HOME/.bashrc"
-    echo "  tmux auto-attach enabled for $REAL_USER"
-fi
+TMUX_BLOCK='# raspi-ham: auto-attach tmux
+if [ -n "$SSH_TTY" ] && [ -z "$TMUX" ] && command -v tmux >/dev/null 2>&1; then
+    exec tmux new-session -A -s ham
+fi'
 
-# tmux config: show useful status bar
-if [ ! -f "$REAL_HOME/.tmux.conf" ]; then
-    cat > "$REAL_HOME/.tmux.conf" << 'TMUXCONF'
-# raspi-ham tmux config
-set -g mouse on
-set -g history-limit 10000
-set -g status-bg black
-set -g status-fg green
-set -g status-left '[#S] '
-set -g status-right '#(hostname -I | awk "{print $1}") | #(raspi-ham-mode status 2>/dev/null || echo "?") | %H:%M'
-set -g status-right-length 60
-TMUXCONF
-    chown "$REAL_USER:$REAL_USER" "$REAL_HOME/.tmux.conf"
-    echo "  tmux config created"
+if [ -f "$REAL_HOME/.profile" ] && ! grep -q "raspi-ham: auto-attach tmux" "$REAL_HOME/.profile"; then
+    printf '\n%s\n' "$TMUX_BLOCK" >> "$REAL_HOME/.profile"
+    echo "  tmux auto-attach enabled"
 fi
 
 echo "  SSH enabled"

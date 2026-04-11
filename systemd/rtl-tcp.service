@@ -15,10 +15,6 @@ Group=rtlsdr
 MemoryMax=128M
 Nice=-5
 LimitNOFILE=1024
-ProtectSystem=strict
-ProtectHome=yes
-PrivateTmp=yes
-NoNewPrivileges=yes
 
 [Install]
 WantedBy=multi-user.target
